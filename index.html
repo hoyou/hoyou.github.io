@@ -1,74 +1,75 @@
---- START OF FILE couponV18.html ---
+--- START OF FILE couponV25.html ---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Christmas Kuji - Pro Edition</title>
+    <title>Christmas Nebula Kuji</title>
     <style>
         :root {
-            --xmas-red: #d42426;
-            --xmas-green: #165b33;
+            --xmas-red: #ff3e3e;
+            --xmas-green: #2ecc71;
             --gold: #f5b942;
-            --glass: rgba(15, 15, 25, 0.85);
+            --glass: rgba(10, 10, 25, 0.9);
         }
-        body { margin: 0; overflow: hidden; background-color: #050510; color: #eee; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; user-select: none; touch-action: none; }
+        body { margin: 0; overflow: hidden; background-color: #020205; color: #eee; font-family: 'Segoe UI', sans-serif; user-select: none; touch-action: none; }
         
-        #bg-overlay { position: fixed; inset: 0; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('./images/bg.png'); background-size: cover; background-position: center; z-index: 0; }
+        #bg-overlay { position: fixed; inset: 0; background: radial-gradient(circle at center, #1a1a3a 0%, #050510 100%); z-index: 0; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
         
-        /* 摄像头预览 */
-        #video-container { position: fixed; bottom: 15px; right: 15px; width: 110px; height: 85px; border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; z-index: 100; transform: scaleX(-1); background: #000; }
+        /* 赛博准星光标 */
+        #hand-cursor {
+            position: fixed; width: 24px; height: 24px;
+            border: 1px solid var(--gold); border-radius: 50%;
+            pointer-events: none; z-index: 999; display: none;
+            transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s;
+        }
+        #hand-cursor::before, #hand-cursor::after {
+            content: ''; position: absolute; background: var(--gold);
+        }
+        #hand-cursor::before { width: 100%; height: 1px; top: 50%; left: 0; }
+        #hand-cursor::after { height: 100%; width: 1px; left: 50%; top: 0; }
+        #hand-cursor.pinched { 
+            width: 40px; height: 40px; border-color: var(--xmas-red); 
+            background: rgba(255, 62, 62, 0.1); box-shadow: 0 0 20px var(--xmas-red); 
+        }
+
+        #video-container { position: fixed; bottom: 15px; right: 15px; width: 110px; height: 85px; border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; z-index: 100; transform: scaleX(-1); background: #000; opacity: 0.8; }
         #video-input { width: 100%; height: 100%; object-fit: cover; }
 
-        /* 左侧 UI 层 */
+        #music-ctrl { position: fixed; top: 15px; right: 15px; z-index: 100; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 20px; background: var(--glass); border: 1px solid var(--gold); }
+
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; gap: 10px; }
         
-        /* 通用卡片样式 */
-        .glass-card { background: var(--glass); border: 1px solid var(--gold); border-radius: 15px; padding: 12px; pointer-events: auto; backdrop-filter: blur(10px); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .glass-card { background: var(--glass); border: 1px solid var(--gold); border-radius: 12px; padding: 10px; pointer-events: auto; backdrop-filter: blur(15px); }
         
-        /* 库存列表 */
-        .inventory-card { width: 200px; max-height: 40vh; overflow-y: auto; }
-        .inventory-card h2 { margin: 0 0 10px 0; font-size: 0.9rem; text-align: center; color: var(--gold); border-bottom: 1px solid rgba(245, 185, 66, 0.3); padding-bottom: 5px; }
-        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-weight: bold; font-size: 0.9rem; }
-        .count-num { font-family: monospace; background: #000; padding: 1px 8px; border-radius: 4px; color: var(--gold); }
+        .inventory-card { width: 140px; }
+        .inventory-card h2 { margin: 0 0 8px 0; font-size: 0.8rem; text-align: center; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.75rem; }
+        .count-num { color: var(--gold); font-family: monospace; }
 
-        /* 历史记录卡片 */
-        .history-card { width: 280px; display: flex; flex-direction: column; }
-        .history-card h2 { margin: 0 0 8px 0; font-size: 0.8rem; color: var(--gold); }
-        #history-list { font-size: 0.75rem; min-height: 200px; }
-        .history-item { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
-        .history-time { color: #888; font-size: 0.65rem; }
+        .history-card { width: 140px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .history-card h2 { margin: 0; font-size: 0.75rem; color: var(--gold); }
+        .history-card.collapsed #history-content { display: none; }
         
-        /* 分页控件 */
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
-        .page-btn { background: var(--xmas-red); border: none; color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-        .page-btn:disabled { background: #444; cursor: not-allowed; }
-        #page-info { font-size: 0.75rem; }
+        #history-list { font-size: 0.65rem; max-height: 15vh; overflow-y: auto; margin-top: 5px; }
+        .history-item { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ccc; }
 
-        /* 抽奖结果弹窗 */
         #result-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 200; }
-        #result-card { width: 90vw; max-width: 380px; background: #fff; border-radius: 20px; overflow: hidden; transform: scale(0.8); opacity: 0; transition: 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.27); text-align: center; border: 6px solid var(--gold); }
+        #result-card { width: 85vw; max-width: 350px; background: #fff; border-radius: 20px; overflow: hidden; transform: scale(0.8); opacity: 0; transition: 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.27); text-align: center; }
         #result-card.show { transform: scale(1); opacity: 1; }
-        .coupon-img { width: 100%; height: auto; max-height: 55vh; object-fit: contain; background: #fff; }
-        .coupon-body { padding: 15px; }
-        .btn-continue { background: var(--xmas-green); color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; font-size: 1.1rem; font-weight: bold; }
+        .coupon-img { width: 100%; height: auto; background: #fff; }
+        .btn-continue { background: #000; color: #fff; border: none; padding: 15px; width: 100%; font-size: 1rem; font-weight: bold; }
 
-        /* 手势提示 */
-        #gesture-hint { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0; transition: 0.4s; width: 80%; }
-        #hint-text { font-size: 2rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--xmas-red); }
-        #power-container { width: 100%; max-width: 250px; height: 10px; background: rgba(255,255,255,0.1); margin: 10px auto; border-radius: 5px; border: 1px solid #fff; overflow: hidden; }
-        #power-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--xmas-red), var(--gold)); }
+        #gesture-hint { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0; transition: 0.4s; }
+        #hint-text { font-size: 1.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--xmas-red); }
+        #power-bar { width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 10px auto; overflow: hidden; }
+        #power-fill { width: 0%; height: 100%; background: var(--xmas-red); box-shadow: 0 0 10px var(--xmas-red); }
 
-        #start-prompt { position: fixed; inset: 0; background: #050510; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .btn-launch { background: var(--xmas-red); color: #fff; border: 3px solid var(--gold); padding: 20px 50px; font-size: 1.5rem; font-weight: bold; border-radius: 50px; box-shadow: 0 0 30px rgba(212, 36, 38, 0.5); }
-
-        /* 移动端特殊优化 */
-        @media (max-width: 500px) {
-            .history-card { width: 220px; }
-            .inventory-card { width: 160px; }
-            #hint-text { font-size: 1.5rem; }
-        }
+        #start-prompt { position: fixed; inset: 0; background: #020205; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .btn-launch { background: transparent; color: var(--gold); border: 2px solid var(--gold); padding: 15px 40px; font-size: 1.2rem; border-radius: 30px; cursor: pointer; transition: 0.3s; }
+        .btn-launch:hover { background: var(--gold); color: #000; }
     </style>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -77,78 +78,69 @@
 </head>
 <body>
 
+    <div id="hand-cursor"></div>
     <div id="bg-overlay"></div>
     <audio id="bgm" loop><source src="./audio/100coffee.mp3" type="audio/mpeg"></audio>
+    <div id="music-ctrl" onclick="toggleMusic()">🎵</div>
 
     <div id="video-container"><video id="video-input"></video></div>
 
     <div id="start-prompt">
-        <h1 style="color:var(--gold); font-size: 3rem; margin-bottom:0;">MERRY</h1>
-        <h2 style="color:#fff; letter-spacing:8px; margin-bottom:40px;">CHRISTMAS</h2>
-        <button class="btn-launch" onclick="initApp()">开启抽奖</button>
+        <h1 style="color:var(--gold); font-size: 2.5rem; margin-bottom:10px; letter-spacing:5px;">NEBULA KUJI</h1>
+        <p style="color:#888; margin-bottom:30px;">使用手势控制旋涡，捏合选取礼物</p>
+        <button class="btn-launch" onclick="initApp()">ENTER SYSTEM</button>
     </div>
 
     <div id="canvas-container"></div>
 
     <div id="ui-layer">
-        <!-- 动态奖池卡片 -->
         <div class="glass-card inventory-card">
-            <h2>奖池余量</h2>
+            <h2>Pool Status</h2>
             <div id="inventory-list"></div>
         </div>
 
-        <!-- 分页历史卡片 -->
-        <div class="glass-card history-card">
-            <h2>最近抽取记录</h2>
-            <div id="history-list"></div>
-            <div class="pagination">
-                <button class="page-btn" id="prev-page" onclick="changePage(-1)">←</button>
-                <span id="page-info">1 / 1</span>
-                <button class="page-btn" id="next-page" onclick="changePage(1)">→</button>
+        <div class="glass-card history-card collapsed" id="history-panel">
+            <div class="history-header" onclick="toggleHistory()">
+                <h2>Recent Wins</h2>
+                <span style="font-size: 0.6rem;">▼</span>
+            </div>
+            <div id="history-content">
+                <div id="history-list"></div>
             </div>
         </div>
 
         <div id="gesture-hint">
-            <div id="hint-text">PUNCH!</div>
-            <div id="power-container"><div id="power-fill"></div></div>
+            <div id="hint-text">PUNCH TO OPEN!</div>
+            <div id="power-bar"><div id="power-fill"></div></div>
         </div>
     </div>
 
     <div id="result-overlay">
         <div id="result-card">
             <img src="" id="res-img" class="coupon-img">
-            <div class="coupon-body">
-                <div id="res-tier-badge" style="font-size: 1.8rem; font-weight: 900; color: var(--xmas-red); margin-bottom: 15px;"></div>
-                <button class="btn-continue" onclick="continueKuji()">收下礼物</button>
+            <div style="padding: 20px;">
+                <div id="res-tier-badge" style="font-size: 1.5rem; font-weight: bold; color: #d42426; margin-bottom: 15px;"></div>
+                <button class="btn-continue" onclick="continueKuji()">ACCEPT GIFT</button>
             </div>
         </div>
     </div>
 
 <script>
-// --- [1] 配置 ---
+// --- [配置与逻辑] ---
 const TIER_CONFIG = {
-    S: { qty: 1, name: "咖啡次卡", img: "./images/S奖品咖啡次卡优惠券.png" },
-    A: { qty: 2, name: "美式天卡", img: "./images/A奖品美式天卡优惠券.png" },
-    B: { qty: 3, name: "25元代金券", img: "./images/B奖品25元代金券.png" },
-    C: { qty: 3, name: "15元代金券", img: "./images/C奖品15元代金券.png" },
-    D: { qty: 5, name: "双倍美式券", img: "./images/D奖品双倍美式券.png" },
-    E: { qty: 5, name: "满减券E", img: "./images/E奖品满减券.png" },
-    F: { qty: 5, name: "满减券F", img: "./images/F奖品满减券.png" },
-    G: { qty: 5, name: "满减券G", img: "./images/G奖品满减券.png" },
-    H: { qty: 10, name: "买二送一", img: "./images/H奖品买二送一券.png" },
-    LAST: { name: "最终大奖", img: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500" }
+    S: { qty: 1, name: "咖啡次卡", img: "./images/S奖品咖啡次卡优惠券.png", color: 0xffd700 },
+    A: { qty: 2, name: "美式天卡", img: "./images/A奖品美式天卡优惠券.png", color: 0xe5e4e2 },
+    B: { qty: 3, name: "25元代金券", img: "./images/B奖品25元代金券.png", color: 0xff8c00 },
+    C: { qty: 3, name: "15元代金券", img: "./images/C奖品15元代金券.png", color: 0x00bfff },
+    D: { qty: 5, name: "双倍美式券", img: "./images/D奖品双倍美式券.png", color: 0x7fff00 },
+    E: { qty: 5, name: "满减券E", img: "./images/E奖品满减券.png", color: 0xff69b4 },
+    F: { qty: 5, name: "满减券F", img: "./images/F奖品满减券.png", color: 0xba55d3 },
+    G: { qty: 5, name: "满减券G", img: "./images/G奖品满减券.png", color: 0x40e0d0 },
+    H: { qty: 10, name: "买二送一", img: "./images/H奖品买二送一券.png", color: 0xffffff },
+    LAST: { name: "最终大奖", img: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500", color: 0xff3e3e }
 };
 
-let GIFT_POOL = [];
-let WIN_HISTORY = [];
-let currentPage = 1;
-const itemsPerPage = 10;
-
-// 图片预加载
-function preload() {
-    Object.values(TIER_CONFIG).forEach(v => { const img = new Image(); img.src = v.img; });
-}
-preload();
+let GIFT_POOL = [], WIN_HISTORY = [], isMusicOn = true;
 
 function buildPool() {
     GIFT_POOL = [];
@@ -160,67 +152,39 @@ function buildPool() {
     }
 }
 
-// --- [2] 逻辑与分页 ---
+function toggleMusic() {
+    const bgm = document.getElementById('bgm'), btn = document.getElementById('music-ctrl');
+    isMusicOn = !isMusicOn;
+    isMusicOn ? bgm.play() : bgm.pause();
+    btn.innerText = isMusicOn ? "🎵" : "🔇";
+}
+
+function toggleHistory() { document.getElementById('history-panel').classList.toggle('collapsed'); }
+
 function updateInventoryUI() {
     const container = document.getElementById('inventory-list');
     container.innerHTML = '';
-    // 获取当前所有等级
-    const tiers = Object.keys(TIER_CONFIG).filter(t => t !== 'LAST');
-    tiers.forEach(tier => {
-        const remaining = GIFT_POOL.filter(g => g.tier === tier).length;
+    Object.keys(TIER_CONFIG).filter(t => t !== 'LAST').forEach(tier => {
+        const count = GIFT_POOL.filter(g => g.tier === tier).length;
         const row = document.createElement('div');
         row.className = 'stat-row';
-        row.innerHTML = `<span>${tier} 赏 (${TIER_CONFIG[tier].name})</span><span class="count-num">${remaining}</span>`;
-        if(remaining === 0) row.style.opacity = '0.3';
+        row.innerHTML = `<span>${tier} Award</span><span class="count-num">${count}</span>`;
+        if(count === 0) row.style.opacity = '0.3';
         container.appendChild(row);
     });
 }
 
 function addHistory(prize) {
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-    WIN_HISTORY.unshift({
-        time: timeStr,
-        tier: prize.tier,
-        name: prize.name
-    });
-    currentPage = 1; // 抽中后回到第一页
-    renderHistory();
-}
-
-function renderHistory() {
+    WIN_HISTORY.unshift(`[${prize.tier}] ${prize.name}`);
     const list = document.getElementById('history-list');
-    const totalPages = Math.max(1, Math.ceil(WIN_HISTORY.length / itemsPerPage));
-    
-    if (currentPage > totalPages) currentPage = totalPages;
-
-    const start = (currentPage - 1) * itemsPerPage;
-    const pageData = WIN_HISTORY.slice(start, start + itemsPerPage);
-
-    list.innerHTML = pageData.map(h => `
-        <div class="history-item">
-            <span class="history-time">${h.time}</span>
-            <span style="color:var(--gold); font-weight:bold;">[${h.tier}]</span>
-            <span style="flex:1; margin-left:8px;">${h.name}</span>
-        </div>
-    `).join('') || '<div style="color:#666; text-align:center; margin-top:50px;">暂无抽取记录</div>';
-
-    document.getElementById('page-info').innerText = `${currentPage} / ${totalPages}`;
-    document.getElementById('prev-page').disabled = currentPage === 1;
-    document.getElementById('next-page').disabled = currentPage === totalPages;
+    list.innerHTML = WIN_HISTORY.slice(0, 10).map(h => `<div class="history-item">${h}</div>`).join('');
 }
 
-function changePage(dir) {
-    currentPage += dir;
-    renderHistory();
-}
-
-// --- [3] 3D 引擎 (基于 V17 适配手机) ---
-let scene, camera, renderer, clock, gifts = [], fragments = [];
-let currentState = 0; 
-let activeGift = null, smoothIndex = 0, activeIndex = 0, swipeVelocity = 0;
+// --- [3D 引擎 - 星云旋涡] ---
+let scene, camera, renderer, clock, gifts = [];
+let currentState = 0, activeGift = null, smoothIndex = 0, activeIndex = 0, swipeVelocity = 0;
 let fistCount = 0, isFistDetected = false, handDepthBase = 0;
-let RADIUS = (window.innerWidth < 500) ? 9 : 14;
+const cursorEl = document.getElementById('hand-cursor');
 
 function initApp() {
     document.getElementById('start-prompt').style.display = 'none';
@@ -228,35 +192,54 @@ function initApp() {
     bgm.volume = 0.4; bgm.play().catch(()=>{});
     
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 2, 11);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 20);
     
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const light = new THREE.PointLight(0xffffff, 1);
-    light.position.set(0, 5, 5);
-    scene.add(light);
+    // 光影环境
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const pLight = new THREE.PointLight(0xf5b942, 2, 50);
+    pLight.position.set(0, 0, 10);
+    scene.add(pLight);
 
     buildPool();
     refreshCarousel();
     updateInventoryUI();
-    renderHistory();
     setupHandTracking();
     clock = new THREE.Clock();
     animate();
 }
 
-function createGiftBox() {
+// 2. 惊艳的礼物盒样式：半透明玻璃 + 核心发光
+function createGiftBox(tierColor) {
     const group = new THREE.Group();
-    const colors = [0xd42426, 0x165b33, 0xf5b942];
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.2, 2.2), new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*3)] }));
-    group.add(body);
-    const rib = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.4, 2.3), new THREE.MeshStandardMaterial({color: 0xffffff}));
-    group.add(rib);
+    
+    // 外部玻璃壳
+    const shellGeo = new THREE.BoxGeometry(2, 2, 2);
+    const shellMat = new THREE.MeshStandardMaterial({ 
+        color: tierColor, transparent: true, opacity: 0.4, 
+        metalness: 0.9, roughness: 0.1, envMapIntensity: 1 
+    });
+    const shell = new THREE.Mesh(shellGeo, shellMat);
+    group.add(shell);
+
+    // 内部发光核心
+    const coreGeo = new THREE.SphereGeometry(0.6, 16, 16);
+    const coreMat = new THREE.MeshBasicMaterial({ color: tierColor });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    group.add(core);
+
+    // 装饰框
+    const frame = new THREE.BoxHelper(shell, 0xffffff);
+    frame.material.opacity = 0.5;
+    frame.material.transparent = true;
+    group.add(frame);
+
+    group.userData = { core, shell, baseColor: tierColor };
     return group;
 }
 
@@ -264,26 +247,42 @@ function refreshCarousel() {
     gifts.forEach(g => scene.remove(g));
     gifts = [];
     GIFT_POOL.forEach((data) => {
-        const gift = createGiftBox();
-        gift.userData = { prize: data };
+        const gift = createGiftBox(data.color);
+        gift.userData.prize = data;
         scene.add(gift);
         gifts.push(gift);
     });
 }
 
 function onHandResults(res) {
-    if (!res.multiHandLandmarks || res.multiHandLandmarks.length === 0) return;
+    if (!res.multiHandLandmarks || res.multiHandLandmarks.length === 0) {
+        cursorEl.style.display = 'none'; return;
+    }
     const lm = res.multiHandLandmarks[0];
     const indexTip = lm[8], thumbTip = lm[4], wrist = lm[0], midBase = lm[9];
+    const visualX = (1 - indexTip.x); 
+    
+    cursorEl.style.display = 'block';
+    cursorEl.style.left = (visualX * 100) + 'vw';
+    cursorEl.style.top = (indexTip.y * 100) + 'vh';
+
     const palmSize = Math.hypot(wrist.x - midBase.x, wrist.y - midBase.y);
 
     if (currentState === 0) {
-        const dx = indexTip.x - (window._lastX || indexTip.x);
-        swipeVelocity += dx * 1.6;
-        window._lastX = indexTip.x;
+        // 持续偏向滑动
+        const diff = visualX - 0.5;
+        if (Math.abs(diff) > 0.08) {
+            swipeVelocity -= diff * 0.05; 
+        }
+        swipeVelocity = Math.max(-0.8, Math.min(0.8, swipeVelocity));
 
-        const pinch = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
-        if (pinch < 0.06 && Math.abs(indexTip.x - 0.5) < 0.25) {
+        // 捏合检测
+        const pinchDist = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
+        const isPinching = pinchDist < 0.05;
+        isPinching ? cursorEl.classList.add('pinched') : cursorEl.classList.remove('pinched');
+
+        if (isPinching && Math.abs(visualX - 0.5) < 0.15 && Math.abs(indexTip.y - 0.5) < 0.2) {
+            // 在旋涡中心捏合
             const total = gifts.length;
             const idx = (Math.round(smoothIndex) % total + total) % total;
             if (gifts[idx]) {
@@ -294,22 +293,22 @@ function onHandResults(res) {
             }
         }
     } else if (currentState === 1) {
-        // 返回
-        const isOpen = [8,12,16,20].every(i => Math.hypot(lm[i].x - wrist.x, lm[i].y - wrist.y) > 0.35);
-        if (isOpen && palmSize > handDepthBase * 1.4) {
-            currentState = 0; activeGift = null;
-            document.getElementById('gesture-hint').style.opacity = 0;
-            return;
-        }
-        // 击打
+        // 击打检测
         const isFist = [8,12,16,20].every(i => Math.hypot(lm[i].x - wrist.x, lm[i].y - wrist.y) < 0.25);
         if (isFist && !isFistDetected) {
             fistCount++;
-            activeGift.scale.setScalar(0.8);
             document.getElementById('power-fill').style.width = (fistCount/3*100)+'%';
+            activeGift.scale.setScalar(0.85);
             if (fistCount >= 3) explodeGift();
         }
         isFistDetected = isFist;
+
+        // 取消捏合返回
+        const isOpen = [8,12,16,20].every(i => Math.hypot(lm[i].x - wrist.x, lm[i].y - wrist.y) > 0.35);
+        if (isOpen && palmSize > handDepthBase * 1.3) {
+            currentState = 0; activeGift = null;
+            document.getElementById('gesture-hint').style.opacity = 0;
+        }
     }
 }
 
@@ -318,16 +317,13 @@ function explodeGift() {
     document.getElementById('gesture-hint').style.opacity = 0;
     let prize = activeGift.userData.prize;
     if (GIFT_POOL.length === 1) prize = { tier: "LAST", ...TIER_CONFIG.LAST };
-    
-    // 移除奖品并记录历史
     GIFT_POOL = GIFT_POOL.filter(g => g !== activeGift.userData.prize);
     addHistory(prize);
     updateInventoryUI();
-    
     activeGift.visible = false;
     setTimeout(() => {
         document.getElementById('res-img').src = prize.img;
-        document.getElementById('res-tier-badge').innerText = prize.tier === 'LAST' ? "最终赏" : prize.tier + " 赏";
+        document.getElementById('res-tier-badge').innerText = prize.tier === 'LAST' ? "LAST ONE AWARD" : prize.tier + " AWARD";
         document.getElementById('result-overlay').style.display = 'flex';
         setTimeout(() => document.getElementById('result-card').classList.add('show'), 50);
     }, 600);
@@ -336,35 +332,59 @@ function explodeGift() {
 function continueKuji() {
     document.getElementById('result-overlay').style.display = 'none';
     document.getElementById('result-card').classList.remove('show');
-    if (GIFT_POOL.length === 0) { alert("奖池已空，感谢参与！"); location.reload(); }
+    if (GIFT_POOL.length === 0) { alert("Congratulations! All gifts have been collected."); location.reload(); }
     else { refreshCarousel(); currentState = 0; }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
+    
     if (currentState === 0) {
         activeIndex += swipeVelocity;
         swipeVelocity *= 0.94;
         smoothIndex += (activeIndex - smoothIndex) * 0.1;
+
         gifts.forEach((g, i) => {
-            const angle = (i - smoothIndex) * (Math.PI * 2 / gifts.length);
-            g.position.set(Math.sin(angle) * RADIUS, Math.sin(t+i)*0.2, Math.cos(angle) * RADIUS - RADIUS);
-            g.rotation.y = -angle + t*0.2;
-            g.visible = true;
+            const offset = (i - smoothIndex);
+            const total = gifts.length;
+            let wrapOffset = ((offset + total / 2) % total + total) % total - total / 2;
+
+            // --- 惊艳的“星云旋涡”路径 ---
+            const angle = wrapOffset * (Math.PI / 5);
+            const radius = 6 + Math.abs(wrapOffset) * 2; // 越远越宽
+            
+            const x = Math.sin(angle) * radius;
+            const y = Math.cos(angle) * radius * 0.3; // 扁平旋涡
+            const z = -Math.abs(wrapOffset) * 8 + 5; // 深度变化
+
+            g.position.set(x, y, z);
+            g.rotation.set(t*0.5, angle, t*0.3);
+            
+            // 核心呼吸动画
+            const s = 1 + Math.sin(t * 3 + i) * 0.2;
+            g.userData.core.scale.setScalar(s);
+            
+            // 中央高亮反馈
+            const focus = Math.max(0, 1 - Math.abs(wrapOffset));
+            g.userData.shell.material.opacity = 0.4 + focus * 0.6;
+            g.scale.setScalar(0.8 + focus * 0.4);
+
+            g.visible = z > -60; // 剪裁过远的
         });
     } else if (currentState === 1) {
-        activeGift.position.lerp(new THREE.Vector3(0, 2, 6.5), 0.1);
-        activeGift.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
-        activeGift.rotation.y += 0.05;
+        activeGift.position.lerp(new THREE.Vector3(0, 0, 12), 0.15);
+        activeGift.scale.lerp(new THREE.Vector3(1.5, 1.5, 1.5), 0.15);
+        activeGift.rotation.y += 0.1;
         gifts.forEach(g => { if(g !== activeGift) g.visible = false; });
     }
+    
     renderer.render(scene, camera);
 }
 
 async function setupHandTracking() {
     const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-    hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6 });
+    hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.65 });
     hands.onResults(onHandResults);
     const cam = new Camera(document.getElementById('video-input'), {
         onFrame: async () => { await hands.send({image: document.getElementById('video-input')}); },
@@ -375,3 +395,4 @@ async function setupHandTracking() {
 </script>
 </body>
 </html>
+--- END OF FILE couponV25.html ---
