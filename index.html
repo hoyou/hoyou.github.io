@@ -1,73 +1,73 @@
---- START OF FILE couponV17.html ---
+--- START OF FILE couponV18.html ---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Christmas Kuji - Mobile Optimized</title>
+    <title>Christmas Kuji - Pro Edition</title>
     <style>
         :root {
             --xmas-red: #d42426;
             --xmas-green: #165b33;
             --gold: #f5b942;
+            --glass: rgba(15, 15, 25, 0.85);
         }
         body { margin: 0; overflow: hidden; background-color: #050510; color: #eee; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; user-select: none; touch-action: none; }
         
-        #bg-overlay {
-            position: fixed; inset: 0;
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('./images/bg.png');
-            background-size: cover; background-position: center; z-index: 0;
-            background-color: #1a1a2e;
-        }
-
-        .snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+        #bg-overlay { position: fixed; inset: 0; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('./images/bg.png'); background-size: cover; background-position: center; z-index: 0; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
         
-        /* 摄像头预览 - 手机端更小 */
-        #video-container { 
-            position: fixed; bottom: 15px; right: 15px; width: 120px; height: 90px; 
-            border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; z-index: 100; 
-            background: #000; transform: scaleX(-1); 
-        }
+        /* 摄像头预览 */
+        #video-container { position: fixed; bottom: 15px; right: 15px; width: 110px; height: 85px; border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; z-index: 100; transform: scaleX(-1); background: #000; }
         #video-input { width: 100%; height: 100%; object-fit: cover; }
 
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
+        /* 左侧 UI 层 */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; gap: 10px; }
         
-        /* 库存卡片响应式 */
-        .inventory-card {
-            background: rgba(15, 15, 15, 0.8); border: 1px solid var(--gold); border-radius: 15px;
-            padding: 12px; width: 180px; pointer-events: auto; backdrop-filter: blur(8px);
-        }
-        .inventory-card h2 { margin: 0 0 10px 0; font-size: 0.9rem; text-align: center; color: var(--gold); }
-        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 900; font-size: 1rem; }
-        .stat-label { display: flex; align-items: center; gap: 5px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .count-num { font-family: monospace; background: #000; padding: 1px 8px; border-radius: 4px; }
+        /* 通用卡片样式 */
+        .glass-card { background: var(--glass); border: 1px solid var(--gold); border-radius: 15px; padding: 12px; pointer-events: auto; backdrop-filter: blur(10px); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        
+        /* 库存列表 */
+        .inventory-card { width: 200px; max-height: 40vh; overflow-y: auto; }
+        .inventory-card h2 { margin: 0 0 10px 0; font-size: 0.9rem; text-align: center; color: var(--gold); border-bottom: 1px solid rgba(245, 185, 66, 0.3); padding-bottom: 5px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-weight: bold; font-size: 0.9rem; }
+        .count-num { font-family: monospace; background: #000; padding: 1px 8px; border-radius: 4px; color: var(--gold); }
 
-        #gesture-hint { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0; transition: 0.4s; z-index: 5; width: 80%; }
-        #hint-text { font-size: 1.8rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--xmas-red); }
-        #power-container { width: 100%; max-width: 250px; height: 8px; background: rgba(255,255,255,0.1); margin: 10px auto; border-radius: 5px; border: 1px solid #fff; overflow: hidden; }
+        /* 历史记录卡片 */
+        .history-card { width: 280px; display: flex; flex-direction: column; }
+        .history-card h2 { margin: 0 0 8px 0; font-size: 0.8rem; color: var(--gold); }
+        #history-list { font-size: 0.75rem; min-height: 200px; }
+        .history-item { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
+        .history-time { color: #888; font-size: 0.65rem; }
+        
+        /* 分页控件 */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+        .page-btn { background: var(--xmas-red); border: none; color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+        .page-btn:disabled { background: #444; cursor: not-allowed; }
+        #page-info { font-size: 0.75rem; }
+
+        /* 抽奖结果弹窗 */
+        #result-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 200; }
+        #result-card { width: 90vw; max-width: 380px; background: #fff; border-radius: 20px; overflow: hidden; transform: scale(0.8); opacity: 0; transition: 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.27); text-align: center; border: 6px solid var(--gold); }
+        #result-card.show { transform: scale(1); opacity: 1; }
+        .coupon-img { width: 100%; height: auto; max-height: 55vh; object-fit: contain; background: #fff; }
+        .coupon-body { padding: 15px; }
+        .btn-continue { background: var(--xmas-green); color: white; border: none; padding: 12px; border-radius: 25px; width: 100%; font-size: 1.1rem; font-weight: bold; }
+
+        /* 手势提示 */
+        #gesture-hint { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0; transition: 0.4s; width: 80%; }
+        #hint-text { font-size: 2rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--xmas-red); }
+        #power-container { width: 100%; max-width: 250px; height: 10px; background: rgba(255,255,255,0.1); margin: 10px auto; border-radius: 5px; border: 1px solid #fff; overflow: hidden; }
         #power-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--xmas-red), var(--gold)); }
 
-        /* 结果框手机适配 */
-        #result-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 200; }
-        #result-card { width: 90vw; max-width: 360px; background: #fff; border-radius: 20px; overflow: hidden; transform: scale(0.8); opacity: 0; transition: 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.27); text-align: center; border: 5px solid var(--gold); }
-        #result-card.show { transform: scale(1); opacity: 1; }
-        .coupon-img { width: 100%; height: auto; max-height: 60vh; object-fit: contain; background: #fff; display: block; }
-        .coupon-body { padding: 15px; background: white; }
-        .tier-badge { font-size: 1.5rem; font-weight: 900; color: var(--xmas-red); margin-bottom: 10px; }
-        .btn-continue { background: var(--xmas-green); color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; width: 100%; font-size: 1rem; }
+        #start-prompt { position: fixed; inset: 0; background: #050510; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .btn-launch { background: var(--xmas-red); color: #fff; border: 3px solid var(--gold); padding: 20px 50px; font-size: 1.5rem; font-weight: bold; border-radius: 50px; box-shadow: 0 0 30px rgba(212, 36, 38, 0.5); }
 
-        /* 开始页面适配 */
-        #start-prompt { position: fixed; inset: 0; background: #050510; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .btn-launch { background: var(--xmas-red); color: #fff; border: 3px solid var(--gold); padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 40px; box-shadow: 0 0 20px rgba(212, 36, 38, 0.5); }
-        
-        #cursor-tracker { position: absolute; width: 30px; height: 30px; border: 2px solid var(--gold); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 100; display: none; }
-
-        /* 手机竖屏隐藏历史记录以节省空间 */
-        @media (max-height: 600px) {
-            .history-mini { display: none; }
-            .inventory-card { width: 150px; }
+        /* 移动端特殊优化 */
+        @media (max-width: 500px) {
+            .history-card { width: 220px; }
+            .inventory-card { width: 160px; }
+            #hint-text { font-size: 1.5rem; }
         }
     </style>
     
@@ -78,33 +78,38 @@
 <body>
 
     <div id="bg-overlay"></div>
-    <div class="snow-container" id="snow"></div>
-
     <audio id="bgm" loop><source src="./audio/100coffee.mp3" type="audio/mpeg"></audio>
 
     <div id="video-container"><video id="video-input"></video></div>
 
     <div id="start-prompt">
-        <h1 style="color:var(--gold); font-size: 2.5rem; margin-bottom:5px;">MERRY</h1>
-        <h2 style="color:#fff; letter-spacing:5px; margin-bottom:30px; font-size: 1.2rem;">CHRISTMAS KUJI</h2>
+        <h1 style="color:var(--gold); font-size: 3rem; margin-bottom:0;">MERRY</h1>
+        <h2 style="color:#fff; letter-spacing:8px; margin-bottom:40px;">CHRISTMAS</h2>
         <button class="btn-launch" onclick="initApp()">开启抽奖</button>
-        <p id="loading-hint" style="color:rgba(255,255,255,0.4); margin-top:15px; font-size: 0.8rem;">正在准备素材...</p>
     </div>
 
     <div id="canvas-container"></div>
-    <div id="cursor-tracker"></div>
 
     <div id="ui-layer">
-        <div class="inventory-card">
-            <h2>剩余奖池</h2>
-            <div class="stat-row"><div class="stat-label"><div class="dot" style="background:#ff00ff"></div> S</div><div class="count-num" id="count-s">0</div></div>
-            <div class="stat-row"><div class="stat-label"><div class="dot" style="background:#ffae00"></div> A</div><div class="count-num" id="count-a">0</div></div>
-            <div class="stat-row"><div class="stat-label"><div class="dot" style="background:#00f2ff"></div> B</div><div class="count-num" id="count-b">0</div></div>
-            <div class="history-mini" style="margin-top:10px; font-size:0.7rem; color:rgba(255,255,255,0.5); max-height:60px; overflow:hidden;"><div id="history-list"></div></div>
+        <!-- 动态奖池卡片 -->
+        <div class="glass-card inventory-card">
+            <h2>奖池余量</h2>
+            <div id="inventory-list"></div>
         </div>
+
+        <!-- 分页历史卡片 -->
+        <div class="glass-card history-card">
+            <h2>最近抽取记录</h2>
+            <div id="history-list"></div>
+            <div class="pagination">
+                <button class="page-btn" id="prev-page" onclick="changePage(-1)">←</button>
+                <span id="page-info">1 / 1</span>
+                <button class="page-btn" id="next-page" onclick="changePage(1)">→</button>
+            </div>
+        </div>
+
         <div id="gesture-hint">
             <div id="hint-text">PUNCH!</div>
-            <div style="color: #fff; font-size: 0.7rem; margin: 3px 0;">(手掌推向镜头取消)</div>
             <div id="power-container"><div id="power-fill"></div></div>
         </div>
     </div>
@@ -113,7 +118,7 @@
         <div id="result-card">
             <img src="" id="res-img" class="coupon-img">
             <div class="coupon-body">
-                <div id="res-tier-badge" class="tier-badge"></div>
+                <div id="res-tier-badge" style="font-size: 1.8rem; font-weight: 900; color: var(--xmas-red); margin-bottom: 15px;"></div>
                 <button class="btn-continue" onclick="continueKuji()">收下礼物</button>
             </div>
         </div>
@@ -122,31 +127,28 @@
 <script>
 // --- [1] 配置 ---
 const TIER_CONFIG = {
-    S: { qty: 1, img: "./images/S奖品咖啡次卡优惠券.png" },
-    A: { qty: 1, img: "./images/A奖品美式天卡优惠券.png" },
-    B: { qty: 2, img: "./images/B奖品25元代金券.png" },
-    C: { qty: 2, img: "./images/C奖品15元代金券.png" },
-    D: { qty: 2, img: "./images/D奖品双倍美式券.png" },
-    E: { qty: 2, img: "./images/E奖品满减券.png" },
-    F: { qty: 2, img: "./images/F奖品满减券.png" },
-    G: { qty: 2, img: "./images/G奖品满减券.png" },
-    H: { qty: 2, img: "./images/H奖品买二送一券.png" },
-    LAST: { img: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500" }
+    S: { qty: 1, name: "咖啡次卡", img: "./images/S奖品咖啡次卡优惠券.png" },
+    A: { qty: 2, name: "美式天卡", img: "./images/A奖品美式天卡优惠券.png" },
+    B: { qty: 3, name: "25元代金券", img: "./images/B奖品25元代金券.png" },
+    C: { qty: 3, name: "15元代金券", img: "./images/C奖品15元代金券.png" },
+    D: { qty: 5, name: "双倍美式券", img: "./images/D奖品双倍美式券.png" },
+    E: { qty: 5, name: "满减券E", img: "./images/E奖品满减券.png" },
+    F: { qty: 5, name: "满减券F", img: "./images/F奖品满减券.png" },
+    G: { qty: 5, name: "满减券G", img: "./images/G奖品满减券.png" },
+    H: { qty: 10, name: "买二送一", img: "./images/H奖品买二送一券.png" },
+    LAST: { name: "最终大奖", img: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=500" }
 };
 
 let GIFT_POOL = [];
-const PRELOADED_IMAGES = {};
+let WIN_HISTORY = [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
-// [优化] 图片预加载函数
-function preloadAssets() {
-    const targets = Object.values(TIER_CONFIG).map(v => v.img);
-    targets.forEach(src => {
-        const img = new Image();
-        img.src = src;
-        PRELOADED_IMAGES[src] = img;
-    });
+// 图片预加载
+function preload() {
+    Object.values(TIER_CONFIG).forEach(v => { const img = new Image(); img.src = v.img; });
 }
-preloadAssets();
+preload();
 
 function buildPool() {
     GIFT_POOL = [];
@@ -158,84 +160,102 @@ function buildPool() {
     }
 }
 
-// --- [2] 音效 ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const SFX = {
-    hit: (v) => {
-        const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        osc.frequency.setValueAtTime(200 + v*100, audioCtx.currentTime);
-        g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-        osc.connect(g); g.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-    },
-    explode: () => {
-        const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-        g.gain.setValueAtTime(0.2, audioCtx.currentTime); g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
-        osc.connect(g); g.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-    }
-};
+// --- [2] 逻辑与分页 ---
+function updateInventoryUI() {
+    const container = document.getElementById('inventory-list');
+    container.innerHTML = '';
+    // 获取当前所有等级
+    const tiers = Object.keys(TIER_CONFIG).filter(t => t !== 'LAST');
+    tiers.forEach(tier => {
+        const remaining = GIFT_POOL.filter(g => g.tier === tier).length;
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        row.innerHTML = `<span>${tier} 赏 (${TIER_CONFIG[tier].name})</span><span class="count-num">${remaining}</span>`;
+        if(remaining === 0) row.style.opacity = '0.3';
+        container.appendChild(row);
+    });
+}
 
-// --- [3] 3D 与 适配 ---
+function addHistory(prize) {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+    WIN_HISTORY.unshift({
+        time: timeStr,
+        tier: prize.tier,
+        name: prize.name
+    });
+    currentPage = 1; // 抽中后回到第一页
+    renderHistory();
+}
+
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    const totalPages = Math.max(1, Math.ceil(WIN_HISTORY.length / itemsPerPage));
+    
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const pageData = WIN_HISTORY.slice(start, start + itemsPerPage);
+
+    list.innerHTML = pageData.map(h => `
+        <div class="history-item">
+            <span class="history-time">${h.time}</span>
+            <span style="color:var(--gold); font-weight:bold;">[${h.tier}]</span>
+            <span style="flex:1; margin-left:8px;">${h.name}</span>
+        </div>
+    `).join('') || '<div style="color:#666; text-align:center; margin-top:50px;">暂无抽取记录</div>';
+
+    document.getElementById('page-info').innerText = `${currentPage} / ${totalPages}`;
+    document.getElementById('prev-page').disabled = currentPage === 1;
+    document.getElementById('next-page').disabled = currentPage === totalPages;
+}
+
+function changePage(dir) {
+    currentPage += dir;
+    renderHistory();
+}
+
+// --- [3] 3D 引擎 (基于 V17 适配手机) ---
 let scene, camera, renderer, clock, gifts = [], fragments = [];
 let currentState = 0; 
 let activeGift = null, smoothIndex = 0, activeIndex = 0, swipeVelocity = 0;
 let fistCount = 0, isFistDetected = false, handDepthBase = 0;
-let RADIUS = 14; // 动态半径
+let RADIUS = (window.innerWidth < 500) ? 9 : 14;
 
 function initApp() {
     document.getElementById('start-prompt').style.display = 'none';
     const bgm = document.getElementById('bgm');
-    bgm.volume = 0.5;
-    bgm.play().catch(() => {});
-    if(audioCtx.state === 'suspended') audioCtx.resume();
+    bgm.volume = 0.4; bgm.play().catch(()=>{});
     
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 2, 10);
+    camera.position.set(0, 2, 11);
     
-    // 手机适配逻辑：如果屏幕太窄，缩小半径，拉远相机
-    if (window.innerWidth < 500) {
-        RADIUS = 8;
-        camera.position.z = 12;
-    }
-
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 移动端性能优化
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const light = new THREE.DirectionalLight(0xffd700, 1.0);
-    light.position.set(5, 10, 7);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const light = new THREE.PointLight(0xffffff, 1);
+    light.position.set(0, 5, 5);
     scene.add(light);
 
     buildPool();
-    createSnowflakes();
     refreshCarousel();
-    updateUI();
+    updateInventoryUI();
+    renderHistory();
     setupHandTracking();
     clock = new THREE.Clock();
     animate();
-    
-    window.addEventListener('resize', onWindowResize);
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    if (window.innerWidth < 500) RADIUS = 8; else RADIUS = 14;
 }
 
 function createGiftBox() {
     const group = new THREE.Group();
-    const colors = [0xd42426, 0x165b33, 0xffffff];
-    const body = new THREE.Mesh(
-        new THREE.BoxGeometry(2, 2, 2),
-        new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*3)] })
-    );
+    const colors = [0xd42426, 0x165b33, 0xf5b942];
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.2, 2.2), new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random()*3)] }));
     group.add(body);
-    const rib = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.3, 2.1), new THREE.MeshStandardMaterial({color: 0xffd700}));
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.4, 2.3), new THREE.MeshStandardMaterial({color: 0xffffff}));
     group.add(rib);
     return group;
 }
@@ -255,17 +275,11 @@ function onHandResults(res) {
     if (!res.multiHandLandmarks || res.multiHandLandmarks.length === 0) return;
     const lm = res.multiHandLandmarks[0];
     const indexTip = lm[8], thumbTip = lm[4], wrist = lm[0], midBase = lm[9];
-    
-    const tracker = document.getElementById('cursor-tracker');
-    tracker.style.display = 'block'; 
-    tracker.style.left = (1-indexTip.x)*window.innerWidth + 'px'; 
-    tracker.style.top = indexTip.y*window.innerHeight + 'px';
-
     const palmSize = Math.hypot(wrist.x - midBase.x, wrist.y - midBase.y);
 
     if (currentState === 0) {
         const dx = indexTip.x - (window._lastX || indexTip.x);
-        swipeVelocity += dx * 1.5;
+        swipeVelocity += dx * 1.6;
         window._lastX = indexTip.x;
 
         const pinch = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
@@ -280,18 +294,17 @@ function onHandResults(res) {
             }
         }
     } else if (currentState === 1) {
-        // 返回手势逻辑
+        // 返回
         const isOpen = [8,12,16,20].every(i => Math.hypot(lm[i].x - wrist.x, lm[i].y - wrist.y) > 0.35);
-        if (isOpen && palmSize > handDepthBase * 1.35) {
+        if (isOpen && palmSize > handDepthBase * 1.4) {
             currentState = 0; activeGift = null;
             document.getElementById('gesture-hint').style.opacity = 0;
             return;
         }
-
+        // 击打
         const isFist = [8,12,16,20].every(i => Math.hypot(lm[i].x - wrist.x, lm[i].y - wrist.y) < 0.25);
         if (isFist && !isFistDetected) {
             fistCount++;
-            SFX.hit(fistCount);
             activeGift.scale.setScalar(0.8);
             document.getElementById('power-fill').style.width = (fistCount/3*100)+'%';
             if (fistCount >= 3) explodeGift();
@@ -302,68 +315,50 @@ function onHandResults(res) {
 
 function explodeGift() {
     currentState = 2;
-    SFX.explode();
     document.getElementById('gesture-hint').style.opacity = 0;
     let prize = activeGift.userData.prize;
     if (GIFT_POOL.length === 1) prize = { tier: "LAST", ...TIER_CONFIG.LAST };
+    
+    // 移除奖品并记录历史
     GIFT_POOL = GIFT_POOL.filter(g => g !== activeGift.userData.prize);
+    addHistory(prize);
+    updateInventoryUI();
     
     activeGift.visible = false;
-    // 简单爆炸碎片
-    for(let i=0; i<15; i++) {
-        const frag = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.4,0.4), activeGift.children[0].material);
-        frag.position.copy(activeGift.position);
-        frag.userData.vel = new THREE.Vector3((Math.random()-0.5)*0.5, Math.random()*0.5, (Math.random()-0.5)*0.5);
-        scene.add(frag); fragments.push(frag);
-    }
-    setTimeout(() => showResult(prize), 600);
-}
-
-function showResult(prize) {
-    const resImg = document.getElementById('res-img');
-    resImg.src = prize.img; // 由于提前预加载，这里会瞬间显示
-    document.getElementById('res-tier-badge').innerText = prize.tier === 'LAST' ? "最终赏" : prize.tier + " 赏";
-    document.getElementById('result-overlay').style.display = 'flex';
-    setTimeout(() => document.getElementById('result-card').classList.add('show'), 50);
+    setTimeout(() => {
+        document.getElementById('res-img').src = prize.img;
+        document.getElementById('res-tier-badge').innerText = prize.tier === 'LAST' ? "最终赏" : prize.tier + " 赏";
+        document.getElementById('result-overlay').style.display = 'flex';
+        setTimeout(() => document.getElementById('result-card').classList.add('show'), 50);
+    }, 600);
 }
 
 function continueKuji() {
     document.getElementById('result-overlay').style.display = 'none';
     document.getElementById('result-card').classList.remove('show');
-    fragments.forEach(f => scene.remove(f));
-    fragments = [];
-    if (GIFT_POOL.length === 0) location.reload();
-    else { refreshCarousel(); updateUI(); currentState = 0; }
-}
-
-function updateUI() {
-    document.getElementById('count-s').innerText = GIFT_POOL.filter(g => g.tier === "S").length;
-    document.getElementById('count-a').innerText = GIFT_POOL.filter(g => g.tier === "A").length;
-    document.getElementById('count-b').innerText = GIFT_POOL.filter(g => g.tier === "B").length;
+    if (GIFT_POOL.length === 0) { alert("奖池已空，感谢参与！"); location.reload(); }
+    else { refreshCarousel(); currentState = 0; }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-
     if (currentState === 0) {
         activeIndex += swipeVelocity;
-        swipeVelocity *= 0.95;
+        swipeVelocity *= 0.94;
         smoothIndex += (activeIndex - smoothIndex) * 0.1;
         gifts.forEach((g, i) => {
             const angle = (i - smoothIndex) * (Math.PI * 2 / gifts.length);
-            g.position.set(Math.sin(angle) * RADIUS, Math.sin(t+i)*0.3, Math.cos(angle) * RADIUS - RADIUS);
+            g.position.set(Math.sin(angle) * RADIUS, Math.sin(t+i)*0.2, Math.cos(angle) * RADIUS - RADIUS);
             g.rotation.y = -angle + t*0.2;
             g.visible = true;
         });
     } else if (currentState === 1) {
-        activeGift.position.lerp(new THREE.Vector3(0, 2, 6), 0.1);
+        activeGift.position.lerp(new THREE.Vector3(0, 2, 6.5), 0.1);
         activeGift.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
-        activeGift.rotation.y += 0.03;
+        activeGift.rotation.y += 0.05;
         gifts.forEach(g => { if(g !== activeGift) g.visible = false; });
     }
-
-    fragments.forEach(f => { f.position.add(f.userData.vel); f.userData.vel.y -= 0.02; });
     renderer.render(scene, camera);
 }
 
@@ -376,21 +371,7 @@ async function setupHandTracking() {
         width: 480, height: 360
     });
     cam.start();
-    document.getElementById('loading-hint').innerText = "加载完成，请点击开启";
 }
-
-function createSnowflakes() {
-    const container = document.getElementById('snow');
-    for(let i=0; i<30; i++) {
-        const flake = document.createElement('div');
-        flake.innerHTML = '❄';
-        flake.style.cssText = `position:absolute;color:white;left:${Math.random()*100}vw;top:-10%;animation:fall ${Math.random()*5+5}s linear infinite;opacity:${Math.random()};`;
-        container.appendChild(flake);
-    }
-}
-const style = document.createElement('style');
-style.innerHTML = `@keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }`;
-document.head.appendChild(style);
 </script>
 </body>
 </html>
